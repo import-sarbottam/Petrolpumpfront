@@ -1,7 +1,8 @@
 import { StyleSheet,TextInput, View,StatusBar,Platform,Text, Pressable } from 'react-native';
-import React, { useState,useEffect } from 'react';
+import React, { useState,useEffect,useContext } from 'react';
 import axios from 'axios';
 import TopBar from './topbar';
+import { AuthContext } from '../context/AuthContext';
 
 export default function AdminPrice({navigation}){
 
@@ -13,24 +14,10 @@ export default function AdminPrice({navigation}){
   const [XPh, setXPh] = useState(null)
   const [MS, setMS] = useState(null)
   const [MSph, setMSph] = useState(null)
-  const [User, setUser] = useState(null)
-  const [Token,setToken] = useState(null)
   const [alertMessage, setAlertMessage] = useState("");
   const regExp = /[a-zA-Z]/g;
+  const {user,token} = useContext(AuthContext)
 
-  useEffect(() => {
-    async function getUser(){
-      try {
-        const user = await axios.get('https://ptrlpump-backend.herokuapp.com/api/getuser/')
-        if(user.data)
-          setUser(user.data.user)
-          setToken(user.data.token)
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    getUser()
-  }, [])
 
   const SetAlert = (e) => {
     setAlertMessage(e);
@@ -73,23 +60,20 @@ export default function AdminPrice({navigation}){
       return;
     }
     
-    axios.defaults.headers.common['Authorization'] = 'Token ' + Token
+    axios.defaults.headers.common['Authorization'] = 'Token ' + token
     await axios.post('https://ptrlpump-backend.herokuapp.com/api/postprice/',{
-      "company": User.company,
+      "company": user.company,
       "p_price": Petrol,
       "d_price": Diesel,
       "xp_price": XP,
       "s_price": MS,
-      "owner": User.username,
+      "owner": user.username,
     }).then((response) => {
       if(response.status===201){
         navigation.navigate('Admin')
       }
-      else{
-        SetAlert("Couldnot process your request")
-      }
     }).catch((err) => {
-      console.log(err)
+      SetAlert("Couldnot process your request")
     });
   }
 

@@ -1,18 +1,9 @@
-import { createContext, useEffect, useReducer } from "react";
+import { createContext, useReducer } from "react";
 import AuthReducer from "./AuthReducer";
-
-async function getUser(){
-  try {
-    const user = await axios.get('https://ptrlpump-backend.herokuapp.com/api/getuser/')
-    if(user.data)
-      return(user.data.user)
-  } catch (error) {
-      return null
-  }
-}
 
 const INITIAL_STATE = {
   user: null,
+  token: null,
   isFetching: false,
   error: false,
 };
@@ -26,6 +17,7 @@ export const AuthContextProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user: state.user,
+        token: state.token,
         isFetching: state.isFetching,
         error: state.error,
         dispatch

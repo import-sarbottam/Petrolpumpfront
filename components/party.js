@@ -1,28 +1,15 @@
 import { StyleSheet,TextInput, View,StatusBar,Platform,Text, Pressable,Image,FlatList,Alert } from 'react-native';
-import React, { useState,useEffect } from 'react';
+import React, { useState,useEffect,useContext } from 'react';
 import axios from 'axios';
 import TopBar from './topbar';
+import { AuthContext } from '../context/AuthContext';
 
 export default function Partyviewer(){
   const [Party, setParty] = useState([])
-  const [Token, setToken] = useState([])
   const [Count, setCount] = useState(0)
   const [Inputbox, setInputbox] = useState(false)
   const [Partyname, setPartyname] = useState(null)
-  const [User, setUser] = useState(null)
-  useEffect(() => {
-    async function getUser(){
-      try {
-        const user = await axios.get('https://ptrlpump-backend.herokuapp.com/api/getuser/')
-        if(user.data)
-          setToken(user.data.token)
-          setUser(user.data.user)
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    getUser()
-  }, [])
+  const {user,token} = useContext(AuthContext)
 
   useEffect(() => {
     async function getParty(){
@@ -54,7 +41,7 @@ export default function Partyviewer(){
 
   async function handleDelete(id){
 
-    axios.defaults.headers.common['Authorization'] = 'Token ' + Token
+    axios.defaults.headers.common['Authorization'] = 'Token ' + token
 
     await axios.delete(`https://ptrlpump-backend.herokuapp.com/api/deleteparty/${id}`).then((result) => {
       setCount(Count+1)
@@ -65,12 +52,12 @@ export default function Partyviewer(){
 
   async function handleSubmit(){
     
-    axios.defaults.headers.common['Authorization'] = 'Token ' + Token
+    axios.defaults.headers.common['Authorization'] = 'Token ' + token
 
     await axios.post('https://ptrlpump-backend.herokuapp.com/api/postparty/',{
-      "company": User.company,
+      "company": user.company,
       "party_name": Partyname,
-      "owner": User.username,
+      "owner": user.username,
     }).then((response) => {
       if(response.status===201){
         setCount(Count+1)

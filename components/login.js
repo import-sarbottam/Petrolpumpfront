@@ -10,10 +10,9 @@ import {
 } from "react-native";
 import { useState, useContext } from "react";
 import axios from "axios";
-import { NativeModules } from "react-native";
 import { AuthContext } from "../context/AuthContext";
 
-export default function Login({ navigation }) {
+export default function Login() {
   const [alertMessage, setAlertMessage] = useState("");
   const [Id, setID] = useState(null);
   const [Password, setPassword] = useState(null);
@@ -52,35 +51,11 @@ export default function Login({ navigation }) {
           password: Password,
         }
       );
-      dispatch({ type: "LOGIN_SUCCESS", payload: res.data.user });
+      dispatch({ type: "LOGIN_SUCCESS", payload: res.data });
     } catch (err) {
       SetAlert("Wrong Username or Password");
       dispatch({ type: "LOGIN_FAILURE", payload: err });
     }
-  }
-
-  async function loginUser() {
-    if (!Password) {
-      SetAlert("No Password Given!");
-      return;
-    }
-
-    if (!Id) {
-      SetAlert("No Username Given!");
-      return;
-    }
-
-    await axios
-      .post("https://ptrlpump-backend.herokuapp.com/api/login/", {
-        username: Id,
-        password: Password,
-      })
-      .then((response) => {
-        if (response.data.user) navigation.navigate("LoginSplash");
-      })
-      .catch((err) => {
-        SetAlert("Wrong Username or Password");
-      });
   }
 
   function handleVisibility() {
@@ -129,7 +104,9 @@ export default function Login({ navigation }) {
         onPress={() => logincall()}
         style={[styles.pressablestyle, { borderColor: "#0088ff" }]}
       >
-        <Text style={[{ color: "#0088ff", fontSize: 16 }]}>Sign In</Text>
+        {isFetching? (<Text style={[{ color: "#0088ff", fontSize: 12 }]}>Please Wait</Text>):
+        (<Text style={[{ color: "#0088ff", fontSize: 16 }]}>Sign In</Text>)}
+        
       </Pressable>
 
       {alertMessage ? (

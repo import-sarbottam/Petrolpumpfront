@@ -1,30 +1,17 @@
 import { StyleSheet,TextInput, View,StatusBar,Platform,Text, Pressable } from 'react-native';
-import React, { useState,useEffect } from 'react';
+import React, { useState,useContext } from 'react';
 import axios from 'axios';
 import TopBar from './topbar';
+import { AuthContext } from '../context/AuthContext';
 
 export default function ChangeAdPassword(){
 
-  const [User, setUser] = useState(null)
-  const [Token,setToken] = useState(null)
   const [alertMessage, setAlertMessage] = useState("");
   const [Old, setOld] = useState(null)
   const [New, setNew] = useState(null)
   const [Confirm, setConfirm] = useState(null)
+  const {token,dispatch} = useContext(AuthContext)
 
-  useEffect(() => {
-    async function getUser(){
-      try {
-        const user = await axios.get('https://ptrlpump-backend.herokuapp.com/api/getuser/')
-        if(user.data)
-          setUser(user.data.user)
-          setToken(user.data.token)
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    getUser()
-  }, [])
 
   const SetAlert = (e) => {
     setAlertMessage(e);
@@ -48,7 +35,7 @@ export default function ChangeAdPassword(){
       return
     }
 
-    axios.defaults.headers.common['Authorization'] = 'Token ' + Token
+    axios.defaults.headers.common['Authorization'] = 'Token ' + token
 
     await axios.put(`https://ptrlpump-backend.herokuapp.com/api/changepassword/`,{
       "old_password": Old,
@@ -58,6 +45,7 @@ export default function ChangeAdPassword(){
         setConfirm(null)
         setOld(null)
         setNew(null)
+        dispatch({ type: "LOGOUT" })
       }
     }).catch((err) => {
       SetAlert('Wrong Old Password')

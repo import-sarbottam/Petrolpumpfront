@@ -1,9 +1,10 @@
 import { StyleSheet,TextInput, View,StatusBar,Pressable,Platform,Text,Keyboard } from 'react-native';
-import React, { useState,useEffect } from 'react';
+import React, { useState,useEffect, useContext } from 'react';
 import {Picker} from '@react-native-picker/picker';
 import TopBar from './topbar';
 import axios from 'axios';
 import { LogBox } from 'react-native';
+import { AuthContext } from '../context/AuthContext';
 LogBox.ignoreLogs(['Warning: Each child in a list should have a unique "key" prop']);
 LogBox.ignoreAllLogs()
 
@@ -20,8 +21,6 @@ export default function EmployeeForm({navigation}){
     const [Slip, setSlip] = useState(null)
     const [Vehicle, setVehicle] = useState(null)
     const [alertMessage, setAlertMessage] = useState("");
-    const [User, setUser] = useState(null)
-    const [Token, setToken] = useState(null)
     const [Petrol, setPetrol] = useState(null)
     const [Petrolph, setPetrolph] = useState(null) 
     const [Diesel, setDiesel] = useState(null)
@@ -32,6 +31,7 @@ export default function EmployeeForm({navigation}){
     const [MSph, setMSph] = useState(null)
     const [keyboardStatus, setKeyboardStatus] = useState(false);
     const regExp = /[a-zA-Z]/g;
+    const {user,token} = useContext(AuthContext)
 
     useEffect(() => {
         const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
@@ -48,31 +48,22 @@ export default function EmployeeForm({navigation}){
       }, []);
 
     useEffect(() => {
-      async function getUser(){
+      async function getParty(){
         try {
-          const user = await axios.get('https://ptrlpump-backend.herokuapp.com/api/getuser/')
-          if(user.data)
-            test = user.data.user
-            setUser(user.data.user)
-            setToken(user.data.token)
-            try {
-              const user = await axios.get(`https://ptrlpump-backend.herokuapp.com/api/party/`)
-              for(let i = 0;i<user.data.length;i++)
-                partynames.push((user.data[i].party_name))
+          const user = await axios.get(`https://ptrlpump-backend.herokuapp.com/api/party/`)
+          for(let i = 0;i<user.data.length;i++){
+            partynames.push((user.data[i].party_name))   
+          }
                 
-              for(let i =0; i<partynames.length; i++){
-                partynameselect.push(<Picker.Item color='black' label={(user.data[i].party_name)} value={(user.data[i].party_name)} />)
-              }
-
-              setPartyPicker(partynameselect)
-            } catch (error) {
-              console.log(error)
-            }
-        } catch (error) {
-          console.log(error)
-        }
+          for(let i =0; i<partynames.length; i++){
+            partynameselect.push(<Picker.Item color='black' label={(user.data[i].party_name)} value={(user.data[i].party_name)} />)
+          }
+          setPartyPicker(partynameselect)
+          }catch (error) {
+            console.log(error)
+          }
       }
-      getUser()
+      getParty()
     }, [])
     
     const SetAlert = (e) => {
@@ -93,18 +84,18 @@ export default function EmployeeForm({navigation}){
         return;
       }
 
-      axios.defaults.headers.common['Authorization'] = 'Token ' + Token
+      axios.defaults.headers.common['Authorization'] = 'Token ' + token
 
       await axios.post('https://ptrlpump-backend.herokuapp.com/api/postentry/',{
           "slip_no": Slip,
-          "company": User.company,
+          "company": user.company,
           "vehicle_no": Vehicle,
           "date": date,
           "party_name": Party,
           "item": Item,
           "litre": Quantity,
           "amt": Amount,
-          "owner": User.username,
+          "owner": user.username,
     },).then((response) => {
       if(response.status === 201){
         setSlip(null)

@@ -1,15 +1,17 @@
 import axios from 'axios';
-import React from 'react';
+import React, {useContext} from 'react';
 import { StyleSheet, Text, View,Image, Pressable } from 'react-native';
 import { NativeModules } from "react-native";
+import { AuthContext } from '../context/AuthContext';
 
 export default function TopBar() {
 
+  const {dispatch} = useContext(AuthContext)
+
     async function logout(){
       try {
-        const user = await axios.get('https://ptrlpump-backend.herokuapp.com/api/logout/')
-        if(user.status)
-          NativeModules.DevSettings.reload();
+        const res = await axios.get('https://ptrlpump-backend.herokuapp.com/api/logout/')
+        dispatch({ type: "LOGOUT" });
       } catch (error) {
         console.log(error)
       }

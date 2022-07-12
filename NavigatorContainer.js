@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useEffect, useContext } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AdminPanel from "./components/adminpanel";
@@ -10,31 +10,30 @@ import ChangeAdPassword from "./components/Changeadminpass";
 import EmployeePanel from "./components/employeepanel";
 import Entryview from "./components/viewentry";
 import Login from "./components/login";
-import LoginSplash from "./components/loginsplash";
 import { AuthContext } from "./context/AuthContext";
 import axios from "axios";
 
 const Stack = createNativeStackNavigator();
 
 const NavigatorContainer = () => {
-  //   const [User, setUser] = useState(null);
+  const {dispatch} = useContext(AuthContext)
 
-  //   useEffect(() => {
-  //     async function getUser() {
-  //       try {
-  //         const user = await axios.get(
-  //           "https://ptrlpump-backend.herokuapp.com/api/getuser/"
-  //         );
-  //         setUser(user.data.user);
-  //       } catch (error) {
-  //         console.log(error);
-  //       }
-  //     }
-  //     getUser();
-  //   }, []);
+    useEffect(() => {
+      async function getUser() {
+        dispatch({ type: "LOGIN_START" });
+        try {
+          const res = await axios.get(
+            "https://ptrlpump-backend.herokuapp.com/api/getuser/"
+          );
+          dispatch({ type: "LOGIN_SUCCESS", payload: res.data });
+        } catch (error) {
+          dispatch({ type: "LOGIN_FAILURE" });
+        }
+      }
+      getUser();
+    }, []);
 
   const { user } = useContext(AuthContext);
-  console.log(user);
 
   return (
     <NavigationContainer>
@@ -63,7 +62,6 @@ const NavigatorContainer = () => {
         ) : (
           <>
             <Stack.Screen name="Login" component={Login} />
-            <Stack.Screen name="LoginSplash" component={LoginSplash} />
           </>
         )}
       </Stack.Navigator>

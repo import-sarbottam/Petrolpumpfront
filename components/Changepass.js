@@ -1,31 +1,17 @@
 import { StyleSheet,TextInput, View,StatusBar,Platform,Text, Pressable } from 'react-native';
-import React, { useState,useEffect } from 'react';
+import React, { useState,useEffect, useContext } from 'react';
 import axios from 'axios';
 import TopBar from './topbar';
+import { AuthContext } from '../context/AuthContext';
 
 export default function ChangeEmpPassword(){
 
-  const [User, setUser] = useState(null)
-  const [Token,setToken] = useState(null)
   const [alertMessage, setAlertMessage] = useState("");
   const [Username, setUsername] = useState(null)
   const [Old, setOld] = useState(null)
   const [New, setNew] = useState(null)
   const [Confirm, setConfirm] = useState(null)
-
-  useEffect(() => {
-    async function getUser(){
-      try {
-        const user = await axios.get('https://ptrlpump-backend.herokuapp.com/api/getuser/')
-        if(user.data)
-          setUser(user.data.user)
-          setToken(user.data.token)
-      } catch (error) {
-        console.log(error)
-      }
-    }
-    getUser()
-  }, [])
+  const {token} = useContext(AuthContext)
 
   const SetAlert = (e) => {
     setAlertMessage(e);
@@ -36,7 +22,7 @@ export default function ChangeEmpPassword(){
   };
 
   async function handleSubmit(){
-    if(!Username || !Old || !New){
+    if(!Username || !Old || !New|| !Confirm){
       SetAlert('One or more fields are empty!!')
       return
     }
@@ -49,7 +35,7 @@ export default function ChangeEmpPassword(){
       return
     }
 
-    axios.defaults.headers.common['Authorization'] = 'Token ' + Token
+    axios.defaults.headers.common['Authorization'] = 'Token ' + token
 
     await axios.put(`https://ptrlpump-backend.herokuapp.com/api/changepassword/${Username}`,{
       "old_password": Old,
